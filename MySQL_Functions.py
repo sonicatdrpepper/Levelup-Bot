@@ -6,12 +6,10 @@ cur = con.cursor()
 import datetime
 import configparser
 
-def INI():
-    config = configparser.ConfigParser()
-    config.read("Config.ini")
-    global Logs
-    Logs = config.get('Settings','Logging')
-
+#Reads INI Settings
+config = configparser.ConfigParser()
+config.read("Config.ini")
+Logs = config.get('Settings','Logging')
 
 def UpdateTime():
     time=datetime.datetime.now().strftime("%m/%d/%Y, %I:%M %p")
@@ -20,7 +18,7 @@ def UpdateTime():
 def WriteSQL(Column,Data,Row,Table):
     Row=f'"{str(Row)}"'
     cur.execute(f"UPDATE {Table} SET {Column} = {Data} WHERE ID = {Row};")
-    if Logs == True:
+    if Logs == 'True':
         time=UpdateTime()
         print(f"{time}: wrote {Data} to row {Row} and column {Column} in table {Table}")
     con.commit()
@@ -29,7 +27,7 @@ def WriteSQL(Column,Data,Row,Table):
 #Inserts a row into the ID Column of the data table
 def InsertSQLrow(Data,table,Column):
     cur.execute(f"INSERT INTO {table} ({Column}) VALUES (?)", [Data])
-    if Logs == True:
+    if Logs == 'True':
         time=UpdateTime()
         print(f"{time}: Inserted new entry {Data} into table Data")
     con.commit()
@@ -38,7 +36,7 @@ def InsertSQLrow(Data,table,Column):
 def DeleteSQLrow(Row,Table):
     Row=f'"{str(Row)}"'
     cur.execute(f"DELETE FROM {Table} WHERE ID = {Row};")
-    if Logs == True:
+    if Logs == 'True':
         time=UpdateTime()
         print(f"{time}: Removed row {Row} from table {Table}")
     con.commit()

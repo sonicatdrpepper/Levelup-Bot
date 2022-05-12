@@ -8,7 +8,7 @@ from MySQL_Functions import CheckSQLUser, DeleteSQLrow, InsertSQLrow, ReadSQL, W
 import configparser
 
 #Initial setup for Discord.py
-TOKEN = "Your Bot Token Here"
+TOKEN = "Your Token Here"
 client = commands.Bot(command_prefix='/',case_insensitive=True)
 PossibleRoles=["Common Traveler","Hardened wastelander","Yuis travel companion","Legendary hero"]
 
@@ -18,8 +18,6 @@ def INI():
     config.read("Config.ini")
     global Roles
     Roles = config.get('Settings','AssignRoles')
-
-INI()
 def CalcXP(ID,MesgLEN):
     #Gets data from DB, and converts it to the correct type
     M = ReadSQL(str(ID),"Messages","data")
@@ -183,13 +181,13 @@ async def on_message(message):
     #I put the code up here because it was easier to work with when it's in its own function
     async def LevelUpScript(LevelUp):
          if LevelUp == 0:
-            if Roles == True:
+            if Roles == 'True':
                 RoleName=RoleManagement(str(ctx.author.id))
             CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
         
          elif LevelUp == 1:
             L = ReadSQL(str(ctx.author.id),"level","data")
-            if Roles == True:
+            if Roles == 'True':
                 RoleName=RoleManagement(str(ctx.author.id))
                 CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
                 PrevRole = PossibleRoles.index(CurrentRoleName)

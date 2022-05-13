@@ -10,3 +10,4 @@ This project currently requires the installation of the following python modules
  * numpy
 
  To run it, set the TOKEN variable in Main.py to your bot accounts token, and then run Main.py
+Custom backgrounds should be 510x255 PNG's

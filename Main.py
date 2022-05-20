@@ -175,6 +175,9 @@ async def on_message(message):
     else:
         await client.process_commands(message)
     
+    #LevelUp script
+    #I put the code up here because it was easier to work with when it's in its own function
+    async def LevelUpScript(LevelUp):
          if LevelUp == 0:
             if Roles == 'True':
                 RoleName=RoleManagement(str(ctx.author.id))
@@ -186,18 +189,9 @@ async def on_message(message):
                 RoleName=RoleManagement(str(ctx.author.id))
                 CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
                 PrevRole = PossibleRoles.index(CurrentRoleName)
-                await RemoveRole(ctx,CurrentRoleName)
+                await RemoveRole(ctx,PossibleRoles[PrevRole])
                 await AddRole(ctx,RoleName)
                 WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
-                if L == 35 or L == 45 or L == 70 or L == 75 or L == 90 or L == 100 or L == 125:
-                    await ctx.send(f":tada: {ctx.message.author} has become a {RoleName}")
-            
-            if L == 25 or L == 50 or L == 75 or L == 100 or L == 125:
-                await ctx.send(f":tada: {ctx.message.author} has reached a milestone level! :tada:")
-            elif L == 69:
-                await ctx.send(f"{ctx.message.author} has reached a very ***nice*** level :sunglasses: :sunglasses: :sunglasses: :sunglasses: :100: :100: :100:")
-            else:
-                await ctx.send(f"Level Up! | :tada:")
             
             WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
             await ctx.message.author.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
@@ -224,6 +218,7 @@ async def on_message(message):
         WriteSQL("EXP","0",str(ctx.author.id),"data")
         WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
         WriteSQL("Background",'"Assets/Backgrounds/BG1.png"',str(ctx.author.id),"data")
+        if Roles == 'True':
         RoleName=RoleManagement(str(ctx.author.id))
         WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
         await AddRole(ctx,RoleName)

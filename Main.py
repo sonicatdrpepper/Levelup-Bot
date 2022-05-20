@@ -139,20 +139,7 @@ async def Background(ctx,name="list"):
     else:
         await ctx.send(f"The possible backgrounds are {BG[0]}, {BG[1]}, {BG[2]}, {BG[3]}, {BG[4]}, {BG[5]}")
 
-@client.command(name="Font")
-async def Font(ctx,name="list"):
-    Fonts=["hack","pixel","impact","comic sans"]
-    memberid=ctx.message.author.id
-    name = name.lower()
-    if name == Fonts[0]:
-        WriteSQL("Font",'"Fonts/Hack-Regular.ttf"',str(memberid),"data")
-        await ctx.send(f"Your font has been set to {Fonts[0]}")
-    if name == Fonts[1]:
-        pass
-    if name == Fonts[2]:
-        pass
-    if name == Fonts[3]:
-        pass
+
 #/help command was reserved so its called /info
 #Displays some basic info about the bot, and more detailed info on certain commands
 @client.command(name="info")
@@ -167,16 +154,27 @@ async def info(ctx,arg="default"):
         await ctx.send("That command does not have a help entry")
 
 
-#Allows you to generate stat cards for other users
+#Sends a message with the stats of a given user
 @client.command(name="getinfo")
 async def getinfo(ctx,arg=0):
     if CheckSQLUser(arg) == 0:
        await ctx.send("That user is not in the database")
+	CR =ReadSQL(str(arg),"CurrentRole","data")
+	M =ReadSQL(str(arg),"Messages","data")
+	E =ReadSQL(str(arg),"EXP","data")
+	CE =ReadSQL(str(arg),"CurrentEXP","data")
+	L =ReadSQL(str(arg),"Level","data")
+	L2 = {5*((10*(4*L))**1.15)}
+	Font = ReadSQL(str(arg),"Font","data")
+	
     user = await client.fetch_user(arg)
-    await user.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
-    CreateStatCard(user.name,arg)
-    f=discord.File("Assets/Usercard.png")
-    await ctx.send(file=f)
+	await ctx.send(f"{user} font is {Font}")
+	await ctx.send(f"{user}'s Current Role is: {CR}")
+	await ctx.send(f"{user} has sent {M} Messages")
+	await ctx.send(f"{user} has {E} EXP")
+	await ctx.send(f"{user} has {CE} EXP For this Level, out of {L2} exp needed to level up")
+	await ctx.send(f"{user} is level {L}")
+
 #This code runs everytime a message is "seen" by the bot
 @client.event
 async def on_message(message):

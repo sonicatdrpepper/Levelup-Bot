@@ -5,18 +5,15 @@ from time import sleep
 #Custom Modules
 from Image_Manip import CreateStatCard,CreateLevelCard
 from MySQL_Functions import CheckSQLUser, DeleteSQLrow, InsertSQLrow, ReadSQL, WriteSQL
-import configparser
 
 #Initial setup for Discord.py
 TOKEN = "Your Token Here"
 client = commands.Bot(command_prefix='/',case_insensitive=True)
 PossibleRoles=["Common Traveler","Hardened wastelander","Yuis travel companion","Legendary hero"]
 
-#Reads INI Config files
-def INI():
+#Reads the INI config file for settings
     config = configparser.ConfigParser()
     config.read("Config.ini")
-    global Roles
     Roles = config.get('Settings','AssignRoles')
 def CalcXP(ID,MesgLEN):
     #Gets data from DB, and converts it to the correct type

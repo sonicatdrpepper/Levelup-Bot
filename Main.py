@@ -7,14 +7,16 @@ from Image_Manip import CreateStatCard,CreateLevelCard
 from MySQL_Functions import CheckSQLUser, DeleteSQLrow, InsertSQLrow, ReadSQL, WriteSQL
 
 #Initial setup for Discord.py
-TOKEN = "Your Token Here"
+TOKEN = "YOUR TOKEN HERE"
 client = commands.Bot(command_prefix='/',case_insensitive=True)
-PossibleRoles=["Common Traveler","Hardened wastelander","Yuis travel companion","Legendary hero"]
+#List of assignable roles, is case sensititve and must be an EXACT match for role name in guild.
+PossibleRoles=["Role1","Role2","Role3"]
 
 #Reads the INI config file for settings
-    config = configparser.ConfigParser()
-    config.read("Config.ini")
-    Roles = config.get('Settings','AssignRoles')
+config = configparser.ConfigParser()
+config.read("Config.ini")
+Roles = config.get('Settings','AssignRoles')
+
 def CalcXP(ID,MesgLEN):
     #Gets data from DB, and converts it to the correct type
     M = ReadSQL(str(ID),"Messages","data")
@@ -26,7 +28,7 @@ def CalcXP(ID,MesgLEN):
     E=float(E)
     CE=float(CE)
     #Actual calculations
-    ToNextLevel=5*((10*(3*L))**1.3)
+    ToNextLevel=5*((10*(4*L))**1.15)
     EXP=.2*float(M)+(int(MesgLEN)/4)
     EXP=EXP/15
     EXP=EXP+float(E)
@@ -53,7 +55,7 @@ async def AddRole(ctx,name):
         print(f"Added role {name} to user {ctx.message.author}")
 
 async def RemoveRole(ctx,name):
-    role=discord.utils.get(ctx.guild.roles,name=str(name))
+    role=discord.utils.get(ctx.guild.roles, name=str(name))
     if name in PossibleRoles:
         await ctx.message.author.remove_roles(role)
         print(f"Removed role {name} from user {ctx.message.author}")
@@ -64,17 +66,14 @@ def RoleManagement(ID):
     L=int(L)
     #Handles what role should be assigned based on the level of the given user 
     #ID should be user ID and should be present in database
-    if L >= 1 and L < 35:
+    if L >= 1 and L < 10:
         return PossibleRoles[0]
-    elif L >= 35 and L < 55:
+    elif L >= 10 and L < 20:
         return PossibleRoles[1]
-    elif L >= 55 and L < 75:
+    elif L >= 20 and L < 30:
         return PossibleRoles[2]
-    elif L > 75:
-        return PossibleRoles[3]
     else:
-        return PossibleRoles[4]
-
+        return PossibleRoles[0]
 
 @client.event
 #Prints to console when bot successfully connects to API
@@ -139,7 +138,20 @@ async def Background(ctx,name="list"):
     else:
         await ctx.send(f"The possible backgrounds are {BG[0]}, {BG[1]}, {BG[2]}, {BG[3]}, {BG[4]}, {BG[5]}")
 
-
+@client.command(name="Font")
+async def Font(ctx,name="list"):
+    Fonts=["hack","pixel","impact","comic sans"]
+    memberid=ctx.message.author.id
+    name = name.lower()
+    if name == Fonts[0]:
+        WriteSQL("Font",'"Fonts/Hack-Regular.ttf"',str(memberid),"data")
+        await ctx.send(f"Your font has been set to {Fonts[0]}")
+    if name == Fonts[1]:
+        pass
+    if name == Fonts[2]:
+        pass
+    if name == Fonts[3]:
+        pass
 #/help command was reserved so its called /info
 #Displays some basic info about the bot, and more detailed info on certain commands
 @client.command(name="info")
@@ -154,16 +166,27 @@ async def info(ctx,arg="default"):
         await ctx.send("That command does not have a help entry")
 
 
-#Allows you to generate stat cards for other users
+#Sends a message with the stats of a given user
 @client.command(name="getinfo")
 async def getinfo(ctx,arg=0):
-    if CheckSQLUser(arg) == 0:
-       await ctx.send("That user is not in the database")
-    user = await client.fetch_user(arg)
-    await user.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
-    CreateStatCard(user.name,arg)
-    f=discord.File("Assets/Usercard.png")
-    await ctx.send(file=f)
+	if CheckSQLUser(arg) == 0:
+		await ctx.send("That user is not in the database")
+	CR =ReadSQL(str(arg),"CurrentRole","data")
+	M =ReadSQL(str(arg),"Messages","data")
+	E =ReadSQL(str(arg),"EXP","data")
+	CE =ReadSQL(str(arg),"CurrentEXP","data")
+	L =ReadSQL(str(arg),"Level","data")
+	L2 = {5*((10*(4*L))**1.15)}
+	Font = ReadSQL(str(arg),"Font","data")
+	
+	user = await client.fetch_user(arg)
+	await ctx.send(f"{user} font is {Font}")
+	await ctx.send(f"{user}'s Current Role is: {CR}")
+	await ctx.send(f"{user} has sent {M} Messages")
+	await ctx.send(f"{user} has {E} EXP")
+	await ctx.send(f"{user} has {CE} EXP For this Level, out of {L2} exp needed to level up")
+	await ctx.send(f"{user} is level {L}")
+
 #This code runs everytime a message is "seen" by the bot
 @client.event
 async def on_message(message):
@@ -174,42 +197,44 @@ async def on_message(message):
         return
     else:
         await client.process_commands(message)
-    
-    #LevelUp script
-    #I put the code up here because it was easier to work with when it's in its own function
-    async def LevelUpScript(LevelUp):
-         if LevelUp == 0:
+    #Updates data in the DB
+    if CheckSQLUser(ctx.author.id) == 1:
+        data=ReadSQL(str(ctx.author.id),"Messages","data")
+        data = int(data)+1
+        WriteSQL("Messages",data,ctx.author.id,"data")
+        LevelUp=CalcXP(ctx.author.id,len(message.content))
+        
+
+        if LevelUp == 0:
             if Roles == 'True':
                 RoleName=RoleManagement(str(ctx.author.id))
             CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
         
-         elif LevelUp == 1:
+        elif LevelUp == 1:
             L = ReadSQL(str(ctx.author.id),"level","data")
             if Roles == 'True':
                 RoleName=RoleManagement(str(ctx.author.id))
                 CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
                 PrevRole = PossibleRoles.index(CurrentRoleName)
-                await RemoveRole(ctx,PossibleRoles[PrevRole])
+                await RemoveRole(ctx,CurrentRoleName)
                 await AddRole(ctx,RoleName)
                 WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
+                if L == 35 or L == 45 or L == 70 or L == 75 or L == 90 or L == 100 or L == 125:
+                    await ctx.send(f":tada: {ctx.message.author} has become a {RoleName}")
+            
+            if L == 25 or L == 50 or L == 75 or L == 100 or L == 125:
+                await ctx.send(f":tada: {ctx.message.author} has reached a milestone level! :tada:")
+            elif L == 69:
+                await ctx.send(f"{ctx.message.author} has reached a very ***nice*** level :sunglasses: :sunglasses: :sunglasses: :sunglasses: :100: :100: :100:")
+            else:
+                await ctx.send(f"Level Up! | :tada:")
             
             WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
             await ctx.message.author.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
             CreateLevelCard(message.author.name,message.author.id)
-            await ctx.send(f"Level Up! | :tada:")
             f=discord.File("Assets/Usercard.png")
             await ctx.send(file=f)
             LevelUp = 0
-        
-    #Updates data in the DB
-    ExistsInDB = CheckSQLUser(ctx.author.id)
-    if ExistsInDB == 1:
-        data=ReadSQL(str(ctx.author.id),"Messages","data")
-        data = int(data)+1
-        WriteSQL("Messages",data,ctx.author.id,"data")
-        LevelUp=CalcXP(ctx.author.id,len(message.content))
-        await LevelUpScript(LevelUp)
-        LevelUp=0
     else:
         #Sets up default values, if a user is not present in the database
         InsertSQLrow(str(ctx.author.id),"data","ID")
@@ -219,11 +244,9 @@ async def on_message(message):
         WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
         WriteSQL("Background",'"Assets/Backgrounds/BG1.png"',str(ctx.author.id),"data")
         if Roles == 'True':
-        RoleName=RoleManagement(str(ctx.author.id))
-        WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
-        await AddRole(ctx,RoleName)
+            RoleName=RoleManagement(str(ctx.author.id))
+            WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
+            await AddRole(ctx,RoleName)
 
-#Reads and parses config file
-INI()
 #Runs the client
 client.run(TOKEN)

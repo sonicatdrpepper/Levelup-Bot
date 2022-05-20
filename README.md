@@ -7,7 +7,5 @@ This project currently requires the installation of the following python modules
  * importlib_metadata
  * discord.py
  * discord.ext.context
- * numpy
 
  To run it, set the TOKEN variable in Main.py to your bot accounts token, and then run Main.py
-Custom backgrounds should be 510x255 PNG's

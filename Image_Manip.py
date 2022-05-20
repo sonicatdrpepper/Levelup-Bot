@@ -1,5 +1,4 @@
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
-import numpy as np
 from MySQL_Functions import ReadSQL
 
 #Draws a variable length line, based on values pulled from the database
@@ -18,7 +17,7 @@ def LevelBar(FP,User):
     #ETOP is equal to how the max amount of EXP before leveling up
     #E is current EXP
     #MaxLength is the maximum length the bar can be drawn
-    ETOP=5*((10*(3*L))**1.3)
+    ETOP=5*((10*(4*L))**1.15)
     E=E/ETOP*100
     draw=ImageDraw.Draw(img)
     MaxLength = E/100*MaxLength
@@ -51,6 +50,8 @@ def LevelCardComposite(FP,offset,User):
     BGPATH=ReadSQL(str(User),"Background","data")
     background = Image.open(BGPATH)
     bg_w, bg_h = background.size
+    img.convert("RGBA")
+    background.convert("RGBA")
     background.paste(img,offset,img)
     background.save('Assets/Usercard.png')
 
@@ -68,7 +69,7 @@ def ModBrightness(FP,Factor):
     img2_output=img2.enhance(Factor)
     img2_output.save(FP)
 
-def CreateStatCard(User,UserID):
+def CreateStatCard(User,UserID,Role="You shouldnt see this"):
     #Sets the correct text color for different backgrounds
     if ReadSQL(str(UserID),"Background","data") == "Assets/Backgrounds/BG7.png" or ReadSQL(str(UserID),"Background","data") == "Assets/Backgrounds/BG8.png"  or ReadSQL(str(UserID),"Background","data") == "Assets/Backgrounds/BG6.png":
         R=0
@@ -89,7 +90,7 @@ def CreateStatCard(User,UserID):
     E=float(E)
     M=int(M)
     CE=float(CE)
-    EN=5*((10*(3*L))**1.3)
+    EN=5*((10*(4*L))**1.15)
     EN=round(EN,2)
     DrawText("Assets/Usercard.png",(5,200),f"Current EXP: {round(CE,2)} out of {EN}",20,R,G,B)
     DrawText("Assets/Usercard.png",(5,230),f"Global EXP: {round(E)}",20,R,G,B)
@@ -114,10 +115,10 @@ def CreateLevelCard(User,UserID):
     CE=float(CE)
     E=float(E)
     M=int(M)
-    EN=5*((10*(3*L))**1.3)
+    EN=5*((10*(4*L))**1.15)
     SquareCrop("Assets/Userpic.png")
     LevelCardComposite("Assets/Userpic.png",(0,50),UserID)
     DrawText("Assets/Usercard.png",(5,200),f"{User} has leveled up!",20,R,G,B)
     DrawText("Assets/Usercard.png",(5,230),f"Current EXP: {round(CE,2)} out of {round(EN,2)}",20,R,G,B)
     DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B)
-    LevelBar("Assets/Usercard.png",UserID,R,G,B)
+    LevelBar("Assets/Usercard.png",UserID)

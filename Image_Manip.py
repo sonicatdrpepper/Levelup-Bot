@@ -1,5 +1,4 @@
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
-import numpy as np
 from MySQL_Functions import ReadSQL
 
 #Draws a variable length line, based on values pulled from the database

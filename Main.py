@@ -154,27 +154,16 @@ async def info(ctx,arg="default"):
         await ctx.send("That command does not have a help entry")
 
 
-#Sends a message with the stats of a given user
+#Allows you to generate stat cards for other users
 @client.command(name="getinfo")
 async def getinfo(ctx,arg=0):
     if CheckSQLUser(arg) == 0:
        await ctx.send("That user is not in the database")
-	CR =ReadSQL(str(arg),"CurrentRole","data")
-	M =ReadSQL(str(arg),"Messages","data")
-	E =ReadSQL(str(arg),"EXP","data")
-	CE =ReadSQL(str(arg),"CurrentEXP","data")
-	L =ReadSQL(str(arg),"Level","data")
-	L2 = {5*((10*(4*L))**1.15)}
-	Font = ReadSQL(str(arg),"Font","data")
-	
     user = await client.fetch_user(arg)
-	await ctx.send(f"{user} font is {Font}")
-	await ctx.send(f"{user}'s Current Role is: {CR}")
-	await ctx.send(f"{user} has sent {M} Messages")
-	await ctx.send(f"{user} has {E} EXP")
-	await ctx.send(f"{user} has {CE} EXP For this Level, out of {L2} exp needed to level up")
-	await ctx.send(f"{user} is level {L}")
-
+    await user.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
+    CreateStatCard(user.name,arg)
+    f=discord.File("Assets/Usercard.png")
+    await ctx.send(file=f)
 #This code runs everytime a message is "seen" by the bot
 @client.event
 async def on_message(message):
@@ -186,9 +175,6 @@ async def on_message(message):
     else:
         await client.process_commands(message)
     
-    #LevelUp script
-    #I put the code up here because it was easier to work with when it's in its own function
-    async def LevelUpScript(LevelUp):
          if LevelUp == 0:
             if Roles == 'True':
                 RoleName=RoleManagement(str(ctx.author.id))
@@ -200,9 +186,18 @@ async def on_message(message):
                 RoleName=RoleManagement(str(ctx.author.id))
                 CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
                 PrevRole = PossibleRoles.index(CurrentRoleName)
-                await RemoveRole(ctx,PossibleRoles[PrevRole])
+                await RemoveRole(ctx,CurrentRoleName)
                 await AddRole(ctx,RoleName)
                 WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
+                if L == 35 or L == 45 or L == 70 or L == 75 or L == 90 or L == 100 or L == 125:
+                    await ctx.send(f":tada: {ctx.message.author} has become a {RoleName}")
+            
+            if L == 25 or L == 50 or L == 75 or L == 100 or L == 125:
+                await ctx.send(f":tada: {ctx.message.author} has reached a milestone level! :tada:")
+            elif L == 69:
+                await ctx.send(f"{ctx.message.author} has reached a very ***nice*** level :sunglasses: :sunglasses: :sunglasses: :sunglasses: :100: :100: :100:")
+            else:
+                await ctx.send(f"Level Up! | :tada:")
             
             WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
             await ctx.message.author.avatar_url_as(format="png").save(fp="Assets/Userpic.png")

@@ -139,7 +139,20 @@ async def Background(ctx,name="list"):
     else:
         await ctx.send(f"The possible backgrounds are {BG[0]}, {BG[1]}, {BG[2]}, {BG[3]}, {BG[4]}, {BG[5]}")
 
-
+@client.command(name="Font")
+async def Font(ctx,name="list"):
+    Fonts=["hack","pixel","impact","comic sans"]
+    memberid=ctx.message.author.id
+    name = name.lower()
+    if name == Fonts[0]:
+        WriteSQL("Font",'"Fonts/Hack-Regular.ttf"',str(memberid),"data")
+        await ctx.send(f"Your font has been set to {Fonts[0]}")
+    if name == Fonts[1]:
+        pass
+    if name == Fonts[2]:
+        pass
+    if name == Fonts[3]:
+        pass
 #/help command was reserved so its called /info
 #Displays some basic info about the bot, and more detailed info on certain commands
 @client.command(name="info")

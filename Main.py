@@ -93,8 +93,9 @@ async def on_guild_join(ctx):
 #Shows stats of the user who sent the message
 @client.command(name="stats")
 async def stats(ctx):
+    CR = ReadSQL(str(ctx.message.author.id),"CurrentRole","data")
     await ctx.author.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
-    CreateStatCard(ctx.message.author.name,ctx.message.author.id)
+    CreateStatCard(ctx.message.author.name,ctx.message.author.id,CR)
     f=discord.File("Assets/Usercard.png")
     await ctx.send(file=f)
 

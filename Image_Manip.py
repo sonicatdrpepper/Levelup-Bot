@@ -1,4 +1,5 @@
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
+import numpy as np
 from MySQL_Functions import ReadSQL
 
 #Draws a variable length line, based on values pulled from the database
@@ -50,6 +51,8 @@ def LevelCardComposite(FP,offset,User):
     BGPATH=ReadSQL(str(User),"Background","data")
     background = Image.open(BGPATH)
     bg_w, bg_h = background.size
+    img.convert("RGBA")
+    background.convert("RGBA")
     background.paste(img,offset,img)
     background.save('Assets/Usercard.png')
 

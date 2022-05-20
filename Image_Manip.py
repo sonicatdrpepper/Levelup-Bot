@@ -51,8 +51,6 @@ def LevelCardComposite(FP,offset,User):
     BGPATH=ReadSQL(str(User),"Background","data")
     background = Image.open(BGPATH)
     bg_w, bg_h = background.size
-    img.convert("RGBA")
-    background.convert("RGBA")
     background.paste(img,offset,img)
     background.save('Assets/Usercard.png')
 
@@ -96,7 +94,7 @@ def CreateStatCard(User,UserID):
     DrawText("Assets/Usercard.png",(5,200),f"Current EXP: {round(CE,2)} out of {EN}",20,R,G,B)
     DrawText("Assets/Usercard.png",(5,230),f"Global EXP: {round(E)}",20,R,G,B)
     DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B)
-    DrawText("Assets/Usercard.png",(5,5),User,20,R,G,B)
+    DrawText("Assets/Usercard.png",(5,5),f"{User} | {Role}",20,R,G,B)
     LevelBar("Assets/Usercard.png",UserID)
 
 def CreateLevelCard(User,UserID):

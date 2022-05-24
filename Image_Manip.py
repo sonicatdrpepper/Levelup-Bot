@@ -60,10 +60,10 @@ def LevelCardComposite(FP,offset,User):
     background.save('Assets/Usercard.png')
 
 #Draws text on top of a image, in path FP, RGB arguments control color
-def DrawText(FP,Offset,Text,size,R,G,B):
+def DrawText(FP,Offset,Text,size,R,G,B,Font):
     img=Image.open(FP)
     Drawer=ImageDraw.Draw(img)
-    CustomFont=ImageFont.truetype('Fonts/Hack-Regular.ttf', size)
+    CustomFont=ImageFont.truetype(Font, size)
     Drawer.text(Offset,Text,font=CustomFont,fill=(R,G,B))
     img.save(FP)
 
@@ -96,10 +96,11 @@ def CreateStatCard(User,UserID,Role="You shouldnt see this"):
     CE=float(CE)
     EN=5*((10*(4*L))**1.15)
     EN=round(EN,2)
-    DrawText("Assets/Usercard.png",(5,200),f"Current EXP: {round(CE,2)} out of {EN}",20,R,G,B)
-    DrawText("Assets/Usercard.png",(5,230),f"Global EXP: {round(E)}",20,R,G,B)
-    DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B)
-    DrawText("Assets/Usercard.png",(5,5),f"{User} | {Role}",20,R,G,B)
+    Font=ReadSQL(str(UserID),"Font","data")
+    DrawText("Assets/Usercard.png",(5,200),f"Current EXP: {round(CE,2)} out of {EN}",20,R,G,B,Font)
+    DrawText("Assets/Usercard.png",(5,230),f"Global EXP: {round(E)}",20,R,G,B,Font)
+    DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B,Font)
+    DrawText("Assets/Usercard.png",(5,5),f"{User} | {Role}",20,R,G,B,Font)
     LevelBar("Assets/Usercard.png",UserID)
 
 def CreateLevelCard(User,UserID):
@@ -119,11 +120,12 @@ def CreateLevelCard(User,UserID):
     CE=float(CE)
     E=float(E)
     M=int(M)
+    Font=ReadSQL(str(UserID),"Font","data")
     EN=5*((10*(4*L))**1.15)
     SquareCrop("Assets/Userpic.png")
     Error = LevelCardComposite("Assets/Userpic.png",(0,50),UserID)
-    DrawText("Assets/Usercard.png",(5,200),f"{User} has leveled up!",20,R,G,B)
-    DrawText("Assets/Usercard.png",(5,230),f"Current EXP: {round(CE,2)} out of {round(EN,2)}",20,R,G,B)
-    DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B)
+    DrawText("Assets/Usercard.png",(5,200),f"{User} has leveled up!",20,R,G,B,Font)
+    DrawText("Assets/Usercard.png",(5,230),f"Current EXP: {round(CE,2)} out of {round(EN,2)}",20,R,G,B,Font)
+    DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B,Font)
     LevelBar("Assets/Usercard.png",UserID)
     return Error

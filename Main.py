@@ -142,18 +142,29 @@ async def Background(ctx,name="list"):
 
 @client.command(name="Font")
 async def Font(ctx,name="list"):
-    Fonts=["hack","pixel","impact","comic sans"]
+    Fonts=["hack","pixel","impact","comicsans","combine","gwain-saga"]
     memberid=ctx.message.author.id
     name = name.lower()
     if name == Fonts[0]:
         WriteSQL("Font",'"Fonts/Hack-Regular.ttf"',str(memberid),"data")
         await ctx.send(f"Your font has been set to {Fonts[0]}")
-    if name == Fonts[1]:
-        pass
-    if name == Fonts[2]:
-        pass
-    if name == Fonts[3]:
-        pass
+    elif name == Fonts[1]:
+        WriteSQL("Font",'"Fonts/Power-Green-Regular.ttf"',str(memberid),"data")
+        await ctx.send(f"Your font has been set to {Fonts[1]}")
+    elif name == Fonts[2]:
+        WriteSQL("Font",'"Fonts/Impact.ttf"',str(memberid),"data")
+        await ctx.send(f"Your font has been set to {Fonts[2]}")
+    elif name == Fonts[3]:
+        WriteSQL("Font",'"Fonts/Comic-Sans.ttf"',str(memberid),"data")
+        await ctx.send(f"Your font has been set to {Fonts[3]}")
+    elif name == Fonts[4]:
+        WriteSQL("Font",'"Fonts/Combine.ttf"',str(memberid),"data")
+        await ctx.send(f"Your font has been set to {Fonts[4]}")
+    elif name == Fonts[5]:
+        WriteSQL("Font",'"Fonts/GwainSaga.ttf"',str(memberid),"data")
+        await ctx.send(f"Your font has been set to {Fonts[5]}")
+    else:
+        await ctx.send(f"Available fonts are {Fonts[0]}, {Fonts[1]}, {Fonts[2]}, {Fonts[3]}, {Fonts[5]}, and {Fonts[4]}")
 #/help command was reserved so its called /info
 #Displays some basic info about the bot, and more detailed info on certain commands
 @client.command(name="info")

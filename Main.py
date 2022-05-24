@@ -94,7 +94,9 @@ async def on_guild_join(ctx):
 async def stats(ctx):
     CR = ReadSQL(str(ctx.message.author.id),"CurrentRole","data")
     await ctx.author.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
-    CreateStatCard(ctx.message.author.name,ctx.message.author.id,CR)
+    Error = CreateStatCard(ctx.message.author.name,ctx.message.author.id,CR)
+    if Error == 1:
+        await ctx.send("Something went wrong when creating the image, probably something with your pfp")
     f=discord.File("Assets/Usercard.png")
     await ctx.send(file=f)
 

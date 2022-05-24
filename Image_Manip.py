@@ -52,7 +52,11 @@ def LevelCardComposite(FP,offset,User):
     bg_w, bg_h = background.size
     img.convert("RGBA")
     background.convert("RGBA")
+    try:
     background.paste(img,offset,img)
+    except:
+        Error = 1
+        return Error
     background.save('Assets/Usercard.png')
 
 #Draws text on top of a image, in path FP, RGB arguments control color
@@ -81,7 +85,7 @@ def CreateStatCard(User,UserID,Role="You shouldnt see this"):
         B=255
     
     SquareCrop("Assets/Userpic.png")
-    LevelCardComposite("Assets/Userpic.png",(0,50),UserID)
+    Error = LevelCardComposite("Assets/Userpic.png",(0,50),UserID)
     E=ReadSQL(str(UserID),"EXP","data")
     L=ReadSQL(str(UserID),"level","data")
     M = ReadSQL(str(UserID),"Messages","data")
@@ -117,8 +121,9 @@ def CreateLevelCard(User,UserID):
     M=int(M)
     EN=5*((10*(4*L))**1.15)
     SquareCrop("Assets/Userpic.png")
-    LevelCardComposite("Assets/Userpic.png",(0,50),UserID)
+    Error = LevelCardComposite("Assets/Userpic.png",(0,50),UserID)
     DrawText("Assets/Usercard.png",(5,200),f"{User} has leveled up!",20,R,G,B)
     DrawText("Assets/Usercard.png",(5,230),f"Current EXP: {round(CE,2)} out of {round(EN,2)}",20,R,G,B)
     DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B)
     LevelBar("Assets/Usercard.png",UserID)
+    return Error

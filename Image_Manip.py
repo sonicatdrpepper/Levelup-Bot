@@ -53,7 +53,7 @@ def LevelCardComposite(FP,offset,User):
     img.convert("RGBA")
     background.convert("RGBA")
     try:
-    background.paste(img,offset,img)
+        background.paste(img,offset,img)
     except:
         Error = 1
         return Error
@@ -102,6 +102,8 @@ def CreateStatCard(User,UserID,Role="You shouldnt see this"):
     DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B,Font)
     DrawText("Assets/Usercard.png",(5,5),f"{User} | {Role}",20,R,G,B,Font)
     LevelBar("Assets/Usercard.png",UserID)
+    if Error == 1:
+        return Error
 
 def CreateLevelCard(User,UserID):
     #Sets the correct text color for different backgrounds

@@ -75,6 +75,7 @@ def RoleManagement(ID):
     else:
         return PossibleRoles[0]
 
+
 @client.event
 #Prints to console when bot successfully connects to API
 async def on_ready():
@@ -192,6 +193,8 @@ async def getinfo(ctx,arg=0):
 	L2 = {5*((10*(4*L))**1.15)}
 	Font = ReadSQL(str(arg),"Font","data")
 	
+    #if ctx.author.id != 367685478226460704 or ctx.author.id != 565040224577781770 or ctx.author.id != 408406156134973461:
+    #    await.ctx.send("You are not a moderator")
 	user = await client.fetch_user(arg)
 	await ctx.send(f"{user} font is {Font}")
 	await ctx.send(f"{user}'s Current Role is: {CR}")
@@ -199,7 +202,6 @@ async def getinfo(ctx,arg=0):
 	await ctx.send(f"{user} has {E} EXP")
 	await ctx.send(f"{user} has {CE} EXP For this Level, out of {L2} exp needed to level up")
 	await ctx.send(f"{user} is level {L}")
-
 #This code runs everytime a message is "seen" by the bot
 @client.event
 async def on_message(message):
@@ -244,7 +246,9 @@ async def on_message(message):
             
             WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
             await ctx.message.author.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
-            CreateLevelCard(message.author.name,message.author.id)
+            Error = CreateLevelCard(message.author.name,message.author.id)
+            if Error == 1:
+                await ctx.send("Something went wrong when creating the image, probably something with your pfp")
             f=discord.File("Assets/Usercard.png")
             await ctx.send(file=f)
             LevelUp = 0

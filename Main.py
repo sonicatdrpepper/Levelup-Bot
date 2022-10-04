@@ -273,10 +273,6 @@ async def on_message(message):
             #Check for Milestone Levels
             if L == 25 or L == 50 or L == 75 or L == 100 or L == 125:
                 await ctx.send(f":tada: {ctx.message.author} has reached a milestone level! :tada:")
-            elif L == 69:
-                await ctx.send(f"{ctx.message.author} has reached a very ***nice*** level :sunglasses: :sunglasses: :sunglasses: :sunglasses: :100: :100: :100:")
-            else:
-                await ctx.send(f"Level Up! | :tada:")
             
             #Reset ctx
             ctx = await client.get_context(message)

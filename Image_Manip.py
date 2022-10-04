@@ -17,7 +17,7 @@ def LevelBar(FP,User):
     #ETOP is equal to how the max amount of EXP before leveling up
     #E is current EXP
     #MaxLength is the maximum length the bar can be drawn
-    ETOP=5*((10*(4*L))**1.15)
+    ETOP=15*((10*(4*L))**1.25)
     E=E/ETOP*100
     draw=ImageDraw.Draw(img)
     MaxLength = E/100*MaxLength
@@ -50,13 +50,17 @@ def LevelCardComposite(FP,offset,User):
     BGPATH=ReadSQL(str(User),"Background","data")
     background = Image.open(BGPATH)
     bg_w, bg_h = background.size
-    img.convert("RGBA")
+    if has_transparency(FP)==False:
+        img.convert("RGBA")
+        img.putalpha(255)
     background.convert("RGBA")
+    background.putalpha(255)
     try:
         background.paste(img,offset,img)
     except:
-        Error = 1
-        return Error
+        img=Image.open("Assets/Fallback.png")
+        background.paste(img,offset,img)
+        background.save('Assets/Usercard.png')
     background.save('Assets/Usercard.png')
 
 #Draws text on top of a image, in path FP, RGB arguments control color
@@ -72,6 +76,16 @@ def ModBrightness(FP,Factor):
     img2=ImageEnhance.Brightness(Image.open(FP))
     img2_output=img2.enhance(Factor)
     img2_output.save(FP)
+
+#Checks if an image has alpha mask
+def has_transparency(FP):
+    img = Image.open(FP).convert("RGBA")
+    alpha_range = img.getextrema()[-1]
+    #if true image is not transparent
+    if alpha_range == (255,255):
+        return False
+    else:
+        return True
 
 def CreateStatCard(User,UserID,Role="You shouldnt see this"):
     #Sets the correct text color for different backgrounds
@@ -94,7 +108,7 @@ def CreateStatCard(User,UserID,Role="You shouldnt see this"):
     E=float(E)
     M=int(M)
     CE=float(CE)
-    EN=5*((10*(4*L))**1.15)
+    EN=15*((10*(4*L))**1.25)
     EN=round(EN,2)
     Font=ReadSQL(str(UserID),"Font","data")
     DrawText("Assets/Usercard.png",(5,200),f"Current EXP: {round(CE,2)} out of {EN}",20,R,G,B,Font)
@@ -102,12 +116,11 @@ def CreateStatCard(User,UserID,Role="You shouldnt see this"):
     DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B,Font)
     DrawText("Assets/Usercard.png",(5,5),f"{User} | {Role}",20,R,G,B,Font)
     LevelBar("Assets/Usercard.png",UserID)
-    if Error == 1:
-        return Error
+    return Error
 
-def CreateLevelCard(User,UserID):
+def CreateLevelCard(User,UserID,Role="You shouldnt see this"):
     #Sets the correct text color for different backgrounds
-    if ReadSQL(str(UserID),"Background","data") == "Assets/Backgrounds/BG7.png" or ReadSQL(str(UserID),"Background","data") == "Assets/Backgrounds/BG8.png"  or ReadSQL(str(UserID),"Background","data") == "Assets/Backgrounds/BG6.png":
+    if ReadSQL(str(UserID),"Background","data") == "Assets/Backgrounds/BG7.png" or ReadSQL(str(UserID),"Background","data") == "Assets/Backgrounds/BG8.png" or ReadSQL(str(UserID),"Background","data") == "Assets/Backgrounds/BG6.png":
         R=0
         G=0
         B=0
@@ -123,11 +136,11 @@ def CreateLevelCard(User,UserID):
     E=float(E)
     M=int(M)
     Font=ReadSQL(str(UserID),"Font","data")
-    EN=5*((10*(4*L))**1.15)
+    EN=15*((10*(4*L))**1.25)
     SquareCrop("Assets/Userpic.png")
     Error = LevelCardComposite("Assets/Userpic.png",(0,50),UserID)
     DrawText("Assets/Usercard.png",(5,200),f"{User} has leveled up!",20,R,G,B,Font)
     DrawText("Assets/Usercard.png",(5,230),f"Current EXP: {round(CE,2)} out of {round(EN,2)}",20,R,G,B,Font)
     DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B,Font)
     LevelBar("Assets/Usercard.png",UserID)
-    return Error
+    DrawText("Assets/Usercard.png",(5,5),f"{Role}",20,R,G,B,Font)

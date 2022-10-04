@@ -2,6 +2,8 @@ import configparser
 import discord
 from discord.ext import commands
 from time import sleep
+import datetime
+import random
 #Custom Modules
 from Image_Manip import CreateStatCard,CreateLevelCard
 from MySQL_Functions import CheckSQLUser, DeleteSQLrow, InsertSQLrow, ReadSQL, WriteSQL
@@ -11,11 +13,17 @@ TOKEN = "YOUR TOKEN HERE"
 client = commands.Bot(command_prefix='/',case_insensitive=True)
 #List of assignable roles, is case sensititve and must be an EXACT match for role name in guild.
 PossibleRoles=["Role1","Role2","Role3"]
+ExcludedUsers=["UserID Here"]
 
 #Reads the INI config file for settings
 config = configparser.ConfigParser()
 config.read("Config.ini")
 Roles = config.get('Settings','AssignRoles')
+
+#Gets the current time and formats it nicely
+def UpdateTime():
+    time=datetime.datetime.now().strftime("%m/%d/%Y, %I:%M %p")
+    return time
 
 def CalcXP(ID,MesgLEN):
     #Gets data from DB, and converts it to the correct type
@@ -28,7 +36,7 @@ def CalcXP(ID,MesgLEN):
     E=float(E)
     CE=float(CE)
     #Actual calculations
-    ToNextLevel=5*((10*(4*L))**1.15)
+    ToNextLevel=15*((10*(4*L))**1.25)
     EXP=.2*float(M)+(int(MesgLEN)/4)
     EXP=EXP/15
     EXP=EXP+float(E)
@@ -36,6 +44,7 @@ def CalcXP(ID,MesgLEN):
     WriteSQL("EXP",str(EXP),str(ID),"data")
     EXP=EXP-float(E)
     EXP=EXP+CE
+    EXP=round(EXP,2)
     WriteSQL("CurrentEXP",str(EXP),str(ID),"data")
     LevelUp = 0
     #output
@@ -123,7 +132,7 @@ async def Background(ctx,name="list"):
     if name.lower() == BG[0]:
         WriteSQL("Background",'"Assets/Backgrounds/BG2.png"',str(memberid),"data")
         await ctx.send(f"Your background has been set to {BG[0]}")
-    elif name.lower == BG[1]:
+    elif name.lower() == BG[1]:
         WriteSQL("Background",'"Assets/Backgrounds/BG1.png"',str(memberid),"data")
         await ctx.send(f"Your background has been set to {BG[1]}")
     elif name.lower() == BG[2]:
@@ -183,14 +192,20 @@ async def info(ctx,arg="default"):
 #Sends a message with the stats of a given user
 @client.command(name="getinfo")
 async def getinfo(ctx,arg=0):
+    if ctx.author.id != 367685478226460704:
+        await ctx.send("This command is for debugging purposes, use /stats instead")
+        return
 	if CheckSQLUser(arg) == 0:
 		await ctx.send("That user is not in the database")
+        return
+    print(ctx.author.id)
 	CR =ReadSQL(str(arg),"CurrentRole","data")
 	M =ReadSQL(str(arg),"Messages","data")
 	E =ReadSQL(str(arg),"EXP","data")
 	CE =ReadSQL(str(arg),"CurrentEXP","data")
-	L =ReadSQL(str(arg),"Level","data")
-	L2 = {5*((10*(4*L))**1.15)}
+    L =ReadSQL(str(arg),"level","data")
+    L=int(L)
+    L2 = {15*((10*(4*L))**1.25)}
 	Font = ReadSQL(str(arg),"Font","data")
 	
     #if ctx.author.id != 367685478226460704 or ctx.author.id != 565040224577781770 or ctx.author.id != 408406156134973461:
@@ -198,6 +213,7 @@ async def getinfo(ctx,arg=0):
 	user = await client.fetch_user(arg)
 	await ctx.send(f"{user} font is {Font}")
 	await ctx.send(f"{user}'s Current Role is: {CR}")
+    await ctx.send(f"{user}'s Current Role `should` be {RoleManagement(str(arg))}")
 	await ctx.send(f"{user} has sent {M} Messages")
 	await ctx.send(f"{user} has {E} EXP")
 	await ctx.send(f"{user} has {CE} EXP For this Level, out of {L2} exp needed to level up")
@@ -214,9 +230,9 @@ async def on_message(message):
         await client.process_commands(message)
     #Updates data in the DB
     if CheckSQLUser(ctx.author.id) == 1:
-        data=ReadSQL(str(ctx.author.id),"Messages","data")
-        data = int(data)+1
-        WriteSQL("Messages",data,ctx.author.id,"data")
+        Messages=ReadSQL(str(ctx.author.id),"Messages","data")
+        Messages = int(Messages)+1
+        WriteSQL("Messages",Messages,ctx.author.id,"data")
         LevelUp=CalcXP(ctx.author.id,len(message.content))
         
 
@@ -226,17 +242,35 @@ async def on_message(message):
             CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
         
         elif LevelUp == 1:
+            if ctx.message.author.id in ExcludedUsers:
+                return
+            print(f"{UpdateTime()} | {ctx.message.author.id} has leveled up!")
             L = ReadSQL(str(ctx.author.id),"level","data")
             if Roles == 'True':
                 RoleName=RoleManagement(str(ctx.author.id))
                 CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
                 PrevRole = PossibleRoles.index(CurrentRoleName)
+                try:
                 await RemoveRole(ctx,CurrentRoleName)
+                except:
+                    user = await client.fetch_user(ctx.author.id)
+                    print(f"{UpdateTime} | Something went wrong when attempting to remove the role {CurrentRoleName} from the user {user.display_name}")
+                    await ctx.send("Something went wrong when trying to Modify your role, your role has not been updated")
+                try:
                 await AddRole(ctx,RoleName)
+                except:
+                    user = await client.fetch_user(ctx.author.id)
+                    print(f"{UpdateTime} | Something went wrong when attempting to add the role {CurrentRoleName} to the user {user.display_name}")
+                    #await ctx.send("Something went wrong when trying to Modify your role, your role has not been updated")
                 WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
-                if L == 35 or L == 45 or L == 70 or L == 75 or L == 90 or L == 100 or L == 125:
+                #Check for Role changes
+                if L == 35 or L == 45 or L == 70 or L == 75 or L == 90 or L == 100:
                     await ctx.send(f":tada: {ctx.message.author} has become a {RoleName}")
+            #Check for Excluded channels
+            if ctx.channel.id == 803113783777165322:
+                ctx = client.get_channel(802021094244089889)
             
+            #Check for Milestone Levels
             if L == 25 or L == 50 or L == 75 or L == 100 or L == 125:
                 await ctx.send(f":tada: {ctx.message.author} has reached a milestone level! :tada:")
             elif L == 69:
@@ -244,9 +278,12 @@ async def on_message(message):
             else:
                 await ctx.send(f"Level Up! | :tada:")
             
+            #Reset ctx
+            ctx = await client.get_context(message)
             WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
             await ctx.message.author.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
-            Error = CreateLevelCard(message.author.name,message.author.id)
+            #Create and send level card
+            Error = CreateLevelCard(message.author.display_name,message.author.id,RoleName)
             if Error == 1:
                 await ctx.send("Something went wrong when creating the image, probably something with your pfp")
             f=discord.File("Assets/Usercard.png")
@@ -260,10 +297,14 @@ async def on_message(message):
         WriteSQL("EXP","0",str(ctx.author.id),"data")
         WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
         WriteSQL("Background",'"Assets/Backgrounds/BG1.png"',str(ctx.author.id),"data")
+        WriteSQL("Font",'"Fonts/Hack-Regular.ttf"',str(ctx.author.id),"data")
         if Roles == 'True':
             RoleName=RoleManagement(str(ctx.author.id))
             WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
+            try:
             await AddRole(ctx,RoleName)
+            except:
+                print(f"{UpdateTime} | Something went wrong when when adding a role, exception thrown while initializing a new user")
 
 #Runs the client
 client.run(TOKEN)

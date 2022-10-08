@@ -1,8 +1,10 @@
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from MySQL_Functions import ReadSQL
+from timeit import Timer
+import datetime
 
 #Draws a variable length line, based on values pulled from the database
-def LevelBar(FP,User):
+def LevelBar(img,User):
     User=str(User)
     M = ReadSQL(User,"Messages","data")
     L=ReadSQL(User,"level","data")
@@ -10,7 +12,7 @@ def LevelBar(FP,User):
     E=float(E)
     L=int(L)
     M=int(M)
-    img=Image.open(FP)
+    #img=Image.open(FP)
     MaxLength=img.width-5
     
     #Range is between 5 pixels and MaxLength variable
@@ -22,12 +24,12 @@ def LevelBar(FP,User):
     draw=ImageDraw.Draw(img)
     MaxLength = E/100*MaxLength
 
-    draw.rectangle((5,225,img.width-5,225),outline="grey",width=3)
+    draw.rectangle((5,230,img.width-5,230),outline="grey",width=3)
     if ReadSQL(str(User),"Background","data") == "Assets/Backgrounds/BG7.png" or ReadSQL(str(User),"Background","data") == "Assets/Backgrounds/BG8.png"  or ReadSQL(str(User),"Background","data") == "Assets/Backgrounds/BG6.png":
-        draw.rectangle((5,225,MaxLength,225),outline="black",width=3)
+        draw.rectangle((5,230,MaxLength,230),outline="black",width=3)
     else:
-        draw.rectangle((5,225,MaxLength,225),outline="white",width=3)
-    img.save("Assets/Usercard.png")
+        draw.rectangle((5,230,MaxLength,230),outline="white",width=3)
+    #img.save("Assets/Usercard.png")
 
 #Crops a given image down to 128x128
 def SquareCrop(FP):
@@ -58,9 +60,11 @@ def LevelCardComposite(FP,offset,User):
     try:
         background.paste(img,offset,img)
     except:
+        Error = 1
         img=Image.open("Assets/Fallback.png")
         background.paste(img,offset,img)
         background.save('Assets/Usercard.png')
+        return Error
     background.save('Assets/Usercard.png')
 
 #Draws text on top of a image, in path FP, RGB arguments control color
@@ -69,6 +73,19 @@ def DrawText(FP,Offset,Text,size,R,G,B,Font):
     Drawer=ImageDraw.Draw(img)
     CustomFont=ImageFont.truetype(Font, size)
     Drawer.text(Offset,Text,font=CustomFont,fill=(R,G,B))
+    img.save(FP)
+
+def QueueText(FP,Offset,Text,size,R,G,B,Font,UserID):
+    img=Image.open(FP)
+    Drawer=ImageDraw.Draw(img)
+    #CustomFont=ImageFont.truetype(Font,size)
+    if type(size) == list:
+        if type(Text) == list:
+            if type(Offset) == list:
+                for i in range(len(Text)):
+                    CustomFont=ImageFont.truetype(Font,size[i])
+                    Drawer.text(Offset[i],Text[i],font=CustomFont,fill=(R,G,B))
+    LevelBar(img,UserID)
     img.save(FP)
 
 #Modifies the brightness of an image
@@ -111,12 +128,14 @@ def CreateStatCard(User,UserID,Role="You shouldnt see this"):
     EN=15*((10*(4*L))**1.25)
     EN=round(EN,2)
     Font=ReadSQL(str(UserID),"Font","data")
-    DrawText("Assets/Usercard.png",(5,200),f"Current EXP: {round(CE,2)} out of {EN}",20,R,G,B,Font)
-    DrawText("Assets/Usercard.png",(5,230),f"Global EXP: {round(E)}",20,R,G,B,Font)
-    DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B,Font)
-    DrawText("Assets/Usercard.png",(5,5),f"{User} | {Role}",20,R,G,B,Font)
-    LevelBar("Assets/Usercard.png",UserID)
+    QueueText("Assets/Usercard.png",[(5,200),(5,230),(125,85),(5,5)],[f"Current EXP: {round(CE,2)} out of {EN}",f"Global EXP: {round(E)}",str(L),f"{User} | {Role}"],[20,20,75,20],R,G,B,Font,UserID)
+    #DrawText("Assets/Usercard.png",(5,200),f"Current EXP: {round(CE,2)} out of {EN}",20,R,G,B,Font)
+    #DrawText("Assets/Usercard.png",(5,230),f"Global EXP: {round(E)}",20,R,G,B,Font)
+    #DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B,Font)
+    #DrawText("Assets/Usercard.png",(5,5),f"{User} | {Role}",20,R,G,B,Font)
+    #LevelBar("Assets/Usercard.png",UserID)
     return Error
+
 
 def CreateLevelCard(User,UserID,Role="You shouldnt see this"):
     #Sets the correct text color for different backgrounds
@@ -137,10 +156,9 @@ def CreateLevelCard(User,UserID,Role="You shouldnt see this"):
     M=int(M)
     Font=ReadSQL(str(UserID),"Font","data")
     EN=15*((10*(4*L))**1.25)
+
     SquareCrop("Assets/Userpic.png")
     Error = LevelCardComposite("Assets/Userpic.png",(0,50),UserID)
-    DrawText("Assets/Usercard.png",(5,200),f"{User} has leveled up!",20,R,G,B,Font)
-    DrawText("Assets/Usercard.png",(5,230),f"Current EXP: {round(CE,2)} out of {round(EN,2)}",20,R,G,B,Font)
-    DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B,Font)
-    LevelBar("Assets/Usercard.png",UserID)
-    DrawText("Assets/Usercard.png",(5,5),f"{Role}",20,R,G,B,Font)
+    QueueText("Assets/Usercard.png",[(5,200),(5,230),(125,85),(5,5)],[f"{User} has leveled up!",f"Current EXP: {round(CE,2)} out of {round(EN,2)}",str(L),f"{Role}"],[20,20,75,20],R,G,B,Font,UserID)
+    #LevelBar("Assets/Usercard.png",UserID)
+    return Error

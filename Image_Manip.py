@@ -75,16 +75,13 @@ def DrawText(FP,Offset,Text,size,R,G,B,Font):
     Drawer.text(Offset,Text,font=CustomFont,fill=(R,G,B))
     img.save(FP)
 
-def QueueText(FP,Offset,Text,size,R,G,B,Font,UserID):
+def QueueText(FP,R,G,B,Font,UserID,Offset=[(0,0)],Text=["Sample Text"],size=[1]):
     img=Image.open(FP)
     Drawer=ImageDraw.Draw(img)
     #CustomFont=ImageFont.truetype(Font,size)
-    if type(size) == list:
-        if type(Text) == list:
-            if type(Offset) == list:
-                for i in range(len(Text)):
-                    CustomFont=ImageFont.truetype(Font,size[i])
-                    Drawer.text(Offset[i],Text[i],font=CustomFont,fill=(R,G,B))
+    for i in range(len(Text)):
+        CustomFont=ImageFont.truetype(Font,size[i])
+        Drawer.text(Offset[i],Text[i],font=CustomFont,fill=(R,G,B))
     LevelBar(img,UserID)
     img.save(FP)
 
@@ -128,12 +125,7 @@ def CreateStatCard(User,UserID,Role="You shouldnt see this"):
     EN=15*((10*(4*L))**1.25)
     EN=round(EN,2)
     Font=ReadSQL(str(UserID),"Font","data")
-    QueueText("Assets/Usercard.png",[(5,200),(5,230),(125,85),(5,5)],[f"Current EXP: {round(CE,2)} out of {EN}",f"Global EXP: {round(E)}",str(L),f"{User} | {Role}"],[20,20,75,20],R,G,B,Font,UserID)
-    #DrawText("Assets/Usercard.png",(5,200),f"Current EXP: {round(CE,2)} out of {EN}",20,R,G,B,Font)
-    #DrawText("Assets/Usercard.png",(5,230),f"Global EXP: {round(E)}",20,R,G,B,Font)
-    #DrawText("Assets/Usercard.png",(125,85),str(L),75,R,G,B,Font)
-    #DrawText("Assets/Usercard.png",(5,5),f"{User} | {Role}",20,R,G,B,Font)
-    #LevelBar("Assets/Usercard.png",UserID)
+    QueueText("Assets/Usercard.png",R,G,B,Font,UserID,[(5,200),(5,230),(125,85),(5,5)],[f"Current EXP: {round(CE,2)} out of {EN}",f"Global EXP: {round(E)}",str(L),f"{User} | {Role}"],[20,20,75,20])
     return Error
 
 
@@ -159,6 +151,5 @@ def CreateLevelCard(User,UserID,Role="You shouldnt see this"):
 
     SquareCrop("Assets/Userpic.png")
     Error = LevelCardComposite("Assets/Userpic.png",(0,50),UserID)
-    QueueText("Assets/Usercard.png",[(5,200),(5,230),(125,85),(5,5)],[f"{User} has leveled up!",f"Current EXP: {round(CE,2)} out of {round(EN,2)}",str(L),f"{Role}"],[20,20,75,20],R,G,B,Font,UserID)
-    #LevelBar("Assets/Usercard.png",UserID)
+    QueueText("Assets/Usercard.png",R,G,B,Font,UserID,[(5,200),(5,230),(125,85),(5,5)],[f"{User} has leveled up!",f"Current EXP: {round(CE,2)} out of {round(EN,2)}",str(L),f"{Role}"],[20,20,75,20])
     return Error

@@ -72,12 +72,24 @@ def RoleManagement(ID):
     L=int(L)
     #Handles what role should be assigned based on the level of the given user 
     #ID should be user ID and should be present in database
-    if L >= 1 and L < 10:
+    if L >= 1 and L < 35:
         return PossibleRoles[0]
-    elif L >= 10 and L < 20:
+    elif L >= 35 and L < 45:
         return PossibleRoles[1]
-    elif L >= 20 and L < 30:
+    elif L >= 45 and L < 69:
         return PossibleRoles[2]
+    elif L == 69:
+        return PossibleRoles[8]
+    elif L > 69 and L < 75:
+        return PossibleRoles[3]
+    elif L >= 75 and L < 90:
+        return PossibleRoles[4]
+    elif L >= 90 and L < 100:
+        return PossibleRoles[5]
+    elif L >= 100 and L < 115:
+        return PossibleRoles[6]
+    elif L >= 125:
+        return PossibleRoles[7]
     else:
         return PossibleRoles[0]
 
@@ -91,93 +103,101 @@ async def on_ready():
 #Bot Commands
 
 #Shows stats of the user who sent the message
-@client.command(name="stats")
+@client.slash_command(name="stats",description="Show your current stats")
 async def stats(ctx):
-    CR = ReadSQL(str(ctx.message.author.id),"CurrentRole","data")
-    await ctx.author.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
-    Error = CreateStatCard(ctx.message.author.name,ctx.message.author.id,CR)
+    #Save Discord User Avatar
+    AvatarURL = ctx.author.avatar.url#(format="png").save(fp="Assets/Userpic.png")
+    Avatar = requests.get(AvatarURL, stream = True)
+    if Avatar.status_code == 200:
+        with open("Assets/Userpic.png",'wb') as f:
+            shutil.copyfileobj(Avatar.raw, f)
+
+    CR = ReadSQL(str(ctx.author.id),"CurrentRole","data")
+    Error = CreateStatCard(ctx.author.name,ctx.author.id,CR)
     if Error == 1:
         await ctx.send("Something went wrong when creating the image, probably something with your pfp")
     f=discord.File("Assets/Usercard.png")
-    await ctx.send(file=f)
-
+    await ctx.respond(file=f)
+    
 #Clears the stats of the user who sent the message, and resets their role(s)
-@client.command(name="clearstats")
+@client.slash_command(name="clearstats",description="Resets your EXP, Levels, and Roles")
 async def ClearStats(ctx,arg="noConfirm"):
     if arg == "noConfirm":
-        await ctx.send("This command will reset `ALL` of your stats, if you are certain you want to continue, type `/clearstats confirm`")
+        await ctx.respond("This command will reset `ALL` of your stats, if you are certain you want to continue, type `/clearstats confirm`")
     if arg == "confirm":
         DeleteSQLrow(ctx.message.author.id,"data")
         for i in range(len(PossibleRoles)):
             await RemoveRole(ctx,PossibleRoles[i])
             sleep(.1)
-        await ctx.send(f"The data for {ctx.message.author} has been deleted.")
+        await ctx.respond(f"The data for {ctx.message.author} has been deleted.")
     else:
         return
+
+
 #Sets the background for Levelup/Stat cards
-@client.command(name="Background")
+@client.slash_command(name="background",description="Allows you to set your Background to one of several presets")
 async def Background(ctx,name="list"):
     BG=["gradient","minecraft","fireside","kde","nekopara","sean"]
-    memberid=ctx.message.author.id
-    
+    memberid=ctx.author.id
     if name.lower() == BG[0]:
         WriteSQL("Background",'"Assets/Backgrounds/BG2.png"',str(memberid),"data")
-        await ctx.send(f"Your background has been set to {BG[0]}")
+        await ctx.respond(f"Your background has been set to {BG[0]}")
     elif name.lower() == BG[1]:
         WriteSQL("Background",'"Assets/Backgrounds/BG1.png"',str(memberid),"data")
-        await ctx.send(f"Your background has been set to {BG[1]}")
+        await ctx.respond(f"Your background has been set to {BG[1]}")
     elif name.lower() == BG[2]:
         WriteSQL("Background",'"Assets/Backgrounds/BG3.png"',str(memberid),"data")
-        await ctx.send(f"Your background has been set to {BG[2]}")
+        await ctx.respond(f"Your background has been set to {BG[2]}")
     elif name.lower() == BG[3]:
         WriteSQL("Background",'"Assets/Backgrounds/BG5.png"',str(memberid),"data")
-        await ctx.send(f"Your background has been set to {BG[3]}")
+        await ctx.respond(f"Your background has been set to {BG[3]}")
     elif name.lower() == BG[4]:
         WriteSQL("Background",'"Assets/Backgrounds/BG6.png"',str(memberid),"data")
-        await ctx.send(f"Your background has been set to {BG[4]}")
+        await ctx.respond(f"Your background has been set to {BG[4]}")
     elif name.lower() == BG[5]:
         WriteSQL("Background",'"Assets/Backgrounds/BG7.png"',str(memberid),"data")
-        await ctx.send(f"Your background has been set to {BG[5]}")
+        await ctx.respond(f"Your background has been set to {BG[5]}")
     else:
-        await ctx.send(f"The possible backgrounds are {BG[0]}, {BG[1]}, {BG[2]}, {BG[3]}, {BG[4]}, {BG[5]}")
+        await ctx.respond(f"The possible backgrounds are {BG[0]}, {BG[1]}, {BG[2]}, {BG[3]}, {BG[4]}, {BG[5]}")
 
-@client.command(name="Font")
+@client.slash_command(name="font",description="Allows you to set the Font that appears on your stats image")
 async def Font(ctx,name="list"):
     Fonts=["hack","pixel","impact","comicsans","combine","gwain-saga"]
-    memberid=ctx.message.author.id
+    memberid=ctx.author.id
     name = name.lower()
     if name == Fonts[0]:
         WriteSQL("Font",'"Fonts/Hack-Regular.ttf"',str(memberid),"data")
-        await ctx.send(f"Your font has been set to {Fonts[0]}")
+        await ctx.respond(f"Your font has been set to {Fonts[0]}")
     elif name == Fonts[1]:
         WriteSQL("Font",'"Fonts/Power-Green-Regular.ttf"',str(memberid),"data")
-        await ctx.send(f"Your font has been set to {Fonts[1]}")
+        await ctx.respond(f"Your font has been set to {Fonts[1]}")
     elif name == Fonts[2]:
         WriteSQL("Font",'"Fonts/Impact.ttf"',str(memberid),"data")
-        await ctx.send(f"Your font has been set to {Fonts[2]}")
+        await ctx.respond(f"Your font has been set to {Fonts[2]}")
     elif name == Fonts[3]:
         WriteSQL("Font",'"Fonts/Comic-Sans.ttf"',str(memberid),"data")
-        await ctx.send(f"Your font has been set to {Fonts[3]}")
+        await ctx.respond(f"Your font has been set to {Fonts[3]}")
     elif name == Fonts[4]:
         WriteSQL("Font",'"Fonts/Combine.ttf"',str(memberid),"data")
-        await ctx.send(f"Your font has been set to {Fonts[4]}")
+        await ctx.respond(f"Your font has been set to {Fonts[4]}")
     elif name == Fonts[5]:
         WriteSQL("Font",'"Fonts/GwainSaga.ttf"',str(memberid),"data")
-        await ctx.send(f"Your font has been set to {Fonts[5]}")
+        await ctx.respond(f"Your font has been set to {Fonts[5]}")
     else:
-        await ctx.send(f"Available fonts are {Fonts[0]}, {Fonts[1]}, {Fonts[2]}, {Fonts[3]}, {Fonts[5]}, and {Fonts[4]}")
+        await ctx.respond(f"Available fonts are {Fonts[0]}, {Fonts[1]}, {Fonts[2]}, {Fonts[3]}, {Fonts[5]}, and {Fonts[4]}")
+
 #/help command was reserved so its called /info
 #Displays some basic info about the bot, and more detailed info on certain commands
-@client.command(name="info")
+@client.slash_command(name="info",description="/help was taken")
 async def info(ctx,arg="default"):
     if arg == "default":
-        await ctx.send("This bot has a few different commands: \n '/stats \n /clearstats \n and /info \n and /Background`")
+        await ctx.respond("This bot has a few different commands: \n '/stats \n /clearstats \n and /info \n and /Background`")
     elif arg.lower() == "clearstats":
-        await ctx.send("`This command resets your stats and roles to the default values`")
+        await ctx.respond("`This command resets your stats and roles to the default values`")
     elif arg.lower() == "background":
-        await ctx.send("`The background command is used to select which background you would like to be displayed on your stat image. \n The available background can be viewed with **/background list**`")
+        await ctx.respond("`The background command is used to select which background you would like to be displayed on your stat image. \n The available background can be viewed with **/background list**`")
     else:
-        await ctx.send("That command does not have a help entry")
+        await ctx.respond("That command does not have a help entry")
 
 
 #Sends a message with the stats of a given user
@@ -186,29 +206,28 @@ async def getinfo(ctx,arg=0):
     if ctx.author.id != 367685478226460704:
         await ctx.send("This command is for debugging purposes, use /stats instead")
         return
-	if CheckSQLUser(arg) == 0:
-		await ctx.send("That user is not in the database")
+    if CheckSQLUser(arg) == 0:
+        await ctx.send("That user is not in the database")
         return
     print(ctx.author.id)
-	CR =ReadSQL(str(arg),"CurrentRole","data")
-	M =ReadSQL(str(arg),"Messages","data")
-	E =ReadSQL(str(arg),"EXP","data")
-	CE =ReadSQL(str(arg),"CurrentEXP","data")
+    CR =ReadSQL(str(arg),"CurrentRole","data")
+    M =ReadSQL(str(arg),"Messages","data")
+    E =ReadSQL(str(arg),"EXP","data")
+    CE =ReadSQL(str(arg),"CurrentEXP","data")
     L =ReadSQL(str(arg),"level","data")
     L=int(L)
     L2 = {15*((10*(4*L))**1.25)}
-	Font = ReadSQL(str(arg),"Font","data")
-	
-    #if ctx.author.id != 367685478226460704 or ctx.author.id != 565040224577781770 or ctx.author.id != 408406156134973461:
-    #    await.ctx.send("You are not a moderator")
-	user = await client.fetch_user(arg)
-	await ctx.send(f"{user} font is {Font}")
-	await ctx.send(f"{user}'s Current Role is: {CR}")
+    Font = ReadSQL(str(arg),"Font","data")
+    user = await client.fetch_user(arg)
+    await ctx.send(f"{user} font is {Font}")
+    await ctx.send(f"{user}'s Current Role is: {CR}")
     await ctx.send(f"{user}'s Current Role `should` be {RoleManagement(str(arg))}")
-	await ctx.send(f"{user} has sent {M} Messages")
-	await ctx.send(f"{user} has {E} EXP")
-	await ctx.send(f"{user} has {CE} EXP For this Level, out of {L2} exp needed to level up")
-	await ctx.send(f"{user} is level {L}")
+    await ctx.send(f"{user} has sent {M} Messages")
+    await ctx.send(f"{user} has {E} EXP")
+    await ctx.send(f"{user} has {CE} EXP For this Level, out of {L2} exp needed to level up")
+    await ctx.send(f"{user} is level {L}")
+
+    
 #This code runs everytime a message is "seen" by the bot
 @client.event
 async def on_message(message):
@@ -228,8 +247,7 @@ async def on_message(message):
         
 
         if LevelUp == 0:
-            if Roles == 'True':
-                RoleName=RoleManagement(str(ctx.author.id))
+            RoleName=RoleManagement(str(ctx.author.id))
             CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
         
         elif LevelUp == 1:
@@ -237,30 +255,32 @@ async def on_message(message):
                 return
             print(f"{UpdateTime()} | {ctx.message.author.id} has leveled up!")
             L = ReadSQL(str(ctx.author.id),"level","data")
+            
             if Roles == 'True':
                 RoleName=RoleManagement(str(ctx.author.id))
                 CurrentRoleName = ReadSQL(str(ctx.author.id),"CurrentRole", "data")
                 PrevRole = PossibleRoles.index(CurrentRoleName)
                 try:
-                await RemoveRole(ctx,CurrentRoleName)
+                    await RemoveRole(ctx,CurrentRoleName)
                 except:
                     user = await client.fetch_user(ctx.author.id)
                     print(f"{UpdateTime} | Something went wrong when attempting to remove the role {CurrentRoleName} from the user {user.display_name}")
                     await ctx.send("Something went wrong when trying to Modify your role, your role has not been updated")
                 try:
-                await AddRole(ctx,RoleName)
+                    await AddRole(ctx,RoleName)
                 except:
                     user = await client.fetch_user(ctx.author.id)
                     print(f"{UpdateTime} | Something went wrong when attempting to add the role {CurrentRoleName} to the user {user.display_name}")
                     #await ctx.send("Something went wrong when trying to Modify your role, your role has not been updated")
                 WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
+                
                 #Check for Role changes
                 if L == 35 or L == 45 or L == 70 or L == 75 or L == 90 or L == 100:
                     await ctx.send(f":tada: {ctx.message.author} has become a {RoleName}")
             #Check for Excluded channels
             if ctx.channel.id == 803113783777165322:
                 ctx = client.get_channel(802021094244089889)
-            
+
             #Check for Milestone Levels
             if L == 25 or L == 50 or L == 75 or L == 100 or L == 125:
                 await ctx.send(f":tada: {ctx.message.author} has reached a milestone level! :tada:")
@@ -268,7 +288,12 @@ async def on_message(message):
             #Reset ctx
             ctx = await client.get_context(message)
             WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
-            await ctx.message.author.avatar_url_as(format="png").save(fp="Assets/Userpic.png")
+            #Save Users Avatar Pic
+            AvatarURL = ctx.author.avatar.url
+            Avatar = requests.get(AvatarURL, stream = True)
+            if Avatar.status_code == 200:
+                with open("Assets/Userpic.png",'wb') as f:
+                    shutil.copyfileobj(Avatar.raw, f)
             #Create and send level card
             Error = CreateLevelCard(message.author.display_name,message.author.id,RoleName)
             if Error == 1:
@@ -285,13 +310,12 @@ async def on_message(message):
         WriteSQL("CurrentEXP","0",str(ctx.author.id),"data")
         WriteSQL("Background",'"Assets/Backgrounds/BG1.png"',str(ctx.author.id),"data")
         WriteSQL("Font",'"Fonts/Hack-Regular.ttf"',str(ctx.author.id),"data")
-        if Roles == 'True':
-            RoleName=RoleManagement(str(ctx.author.id))
-            WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
-            try:
+        RoleName=RoleManagement(str(ctx.author.id))
+        WriteSQL("CurrentRole",'"'+RoleName+'"',str(ctx.author.id),"data")
+        try:
             await AddRole(ctx,RoleName)
-            except:
-                print(f"{UpdateTime} | Something went wrong when when adding a role, exception thrown while initializing a new user")
+        except:
+            print(f"{UpdateTime()} | Something went wrong when when adding a role, exception thrown while initializing a new user")
 
 #Runs the client
 client.run(TOKEN)

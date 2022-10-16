@@ -1,3 +1,3 @@
 #!/bin/bash
-pip3 install discord.py discord.ext.context
+pip3 install py-cord discord.ext.context
 wait -f

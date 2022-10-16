@@ -1,9 +1,6 @@
-import configparser
-import discord
+import configparser,discord,datetime,requests,shutil
 from discord.ext import commands
 from time import sleep
-import datetime
-import random
 #Custom Modules
 from Image_Manip import CreateStatCard,CreateLevelCard
 from MySQL_Functions import CheckSQLUser, DeleteSQLrow, InsertSQLrow, ReadSQL, WriteSQL
@@ -89,12 +86,6 @@ def RoleManagement(ID):
 #Prints to console when bot successfully connects to API
 async def on_ready():
     print("Connected to the API")
-
-#Adds ID of guild into settings table upon joining
-#Currently have no idea if this works, but its supposed to initialize a row in the second table in the Database upon joining a guild for the first time
-#This was to be used for guild specific settings/options
-async def on_guild_join(ctx):
-    InsertSQLrow(str(ctx.guild.id),"Settings","GuildID")
 
 
 #Bot Commands

@@ -8,5 +8,4 @@ This project currently requires the installation of the following python modules
  * py-cord
  * discord.ext.context
 
- To run it, set the TOKEN variable in Main.py to your bot accounts token, and then run Main.py
- Includes a bash script to install pip dependencies
+ To use the bot set the TOKEN variable in Main.py, and then execute Main.py

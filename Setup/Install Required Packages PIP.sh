@@ -1,3 +1,3 @@
 #!/bin/bash
-pip3 install importlib_metadata py-cord discord.ext.context
+pip3 install -r requirements.txt
 wait -f

@@ -8,4 +8,4 @@ This project currently requires the installation of the following python modules
  * py-cord
  * discord.ext.context
 
- To use the bot set the TOKEN variable in Main.py, and then execute Main.py
+ To use the bot set the TOKEN variable in Main.py, and then run Main.py

@@ -137,7 +137,7 @@ async def ClearStats(ctx,arg="noConfirm"):
 #Sets the background for Levelup/Stat cards
 @client.slash_command(name="background",description="Allows you to set your Background to one of several presets")
 async def Background(ctx,name="list"):
-    BG=["gradient","minecraft","fireside","kde","nekopara","sean"]
+    BG=["gradient","minecraft","fireside","kde"]
     memberid=ctx.author.id
     if name.lower() == BG[0]:
         WriteSQL("Background",'"Assets/Backgrounds/BG2.png"',str(memberid),"data")
@@ -151,40 +151,19 @@ async def Background(ctx,name="list"):
     elif name.lower() == BG[3]:
         WriteSQL("Background",'"Assets/Backgrounds/BG5.png"',str(memberid),"data")
         await ctx.respond(f"Your background has been set to {BG[3]}")
-    elif name.lower() == BG[4]:
-        WriteSQL("Background",'"Assets/Backgrounds/BG6.png"',str(memberid),"data")
-        await ctx.respond(f"Your background has been set to {BG[4]}")
-    elif name.lower() == BG[5]:
-        WriteSQL("Background",'"Assets/Backgrounds/BG7.png"',str(memberid),"data")
-        await ctx.respond(f"Your background has been set to {BG[5]}")
     else:
-        await ctx.respond(f"The possible backgrounds are {BG[0]}, {BG[1]}, {BG[2]}, {BG[3]}, {BG[4]}, {BG[5]}")
+        await ctx.respond(f"The possible backgrounds are {BG[0]}, {BG[1]}, {BG[2]}, {BG[3]}")
 
 @client.slash_command(name="font",description="Allows you to set the Font that appears on your stats image")
 async def Font(ctx,name="list"):
-    Fonts=["hack","pixel","impact","comicsans","combine","gwain-saga"]
+    Fonts=["hack"]
     memberid=ctx.author.id
     name = name.lower()
     if name == Fonts[0]:
         WriteSQL("Font",'"Fonts/Hack-Regular.ttf"',str(memberid),"data")
         await ctx.respond(f"Your font has been set to {Fonts[0]}")
-    elif name == Fonts[1]:
-        WriteSQL("Font",'"Fonts/Power-Green-Regular.ttf"',str(memberid),"data")
-        await ctx.respond(f"Your font has been set to {Fonts[1]}")
-    elif name == Fonts[2]:
-        WriteSQL("Font",'"Fonts/Impact.ttf"',str(memberid),"data")
-        await ctx.respond(f"Your font has been set to {Fonts[2]}")
-    elif name == Fonts[3]:
-        WriteSQL("Font",'"Fonts/Comic-Sans.ttf"',str(memberid),"data")
-        await ctx.respond(f"Your font has been set to {Fonts[3]}")
-    elif name == Fonts[4]:
-        WriteSQL("Font",'"Fonts/Combine.ttf"',str(memberid),"data")
-        await ctx.respond(f"Your font has been set to {Fonts[4]}")
-    elif name == Fonts[5]:
-        WriteSQL("Font",'"Fonts/GwainSaga.ttf"',str(memberid),"data")
-        await ctx.respond(f"Your font has been set to {Fonts[5]}")
     else:
-        await ctx.respond(f"Available fonts are {Fonts[0]}, {Fonts[1]}, {Fonts[2]}, {Fonts[3]}, {Fonts[5]}, and {Fonts[4]}")
+        await ctx.respond(f"Available fonts are {Fonts[0]}")
 
 #/help command was reserved so its called /info
 #Displays some basic info about the bot, and more detailed info on certain commands
